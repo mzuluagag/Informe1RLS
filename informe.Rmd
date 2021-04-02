@@ -25,6 +25,8 @@ summary(datos)
 #Analizar estos datos
 barplot(Area_contruida, names.arg = Area_contruida, main = "Dátos áreas viviendas", xlab = "Datos", ylab = "Área de la vivienda", col = "orange", space = 0.7)
 barplot(precio_millon, names.arg = precio_millon, main = "Dátos de precios", xlab = "Datos", ylab = "Precio en millones", col = "sky blue", space = 0.7)
+
+
 #Hacer breve análisis de estas gráficas
 ```
 
@@ -54,19 +56,70 @@ abline(modelo,col="sky blue")
 __4.__ Construir un intervalo de confianza (95%) para el coeficiente B1, interpretar y concluir si el coeficiente es igual a cero o no. Compare esteresultado con una prueba de hipotesis t.
 
 ```{r}
+confianza=0.95
+t=qt((confianza+(1-confianza)/2),df=-2+length(precio_millon))
 
+B1=summary(modelo)$coefficients[2]
 
+errorB1=summary(modelo)$coefficients[4]
+
+cat("El límite inferior es: ", B1-(t*errorB1), ", y el límite superior es: ", B1+(t*errorB1))
+#hacer conclusión con base en el intérvalo de confianza
 ```
 
 
 __5.__ Calcule e interprete el indicador de bondad y ajuste R^2.
 
+```{r}
+rsq=cor(Area_contruida,precio_millon)^2
+rsq
+#interpretar el R2
+```
+
+
 __6.__ ¿Cuál sería el precio promedio estimado para un apartamento de 110 metros cuadrados? Considera entonces con este resultado que un apartamento en la misma zona con 110 metros cuadrados en un precio de 200 millones sería una buena oferta? Qué consideraciones adicionales se deben tener?.
 
+```{r}
+summary(modelo)$coefficients[1] + summary(modelo)$coefficients[2]*110
+
+plot(Area_contruida, precio_millon, col = "blue", type = "n")
+points(Area_contruida, precio_millon, col = "blue")
+abline(modelo,col="sky blue")
+points(110, 200, col = "red", pch = 20)
+
+plot(110,200, xlim = c(0,200), ylim = c(0,500), col = "red", pch = 20)
+abline(modelo,col="sky blue")
+
+diferencia = summary(modelo)$coefficients[1] + summary(modelo)$coefficients[2]*110 - 200
+diferencia
+
+```
+
+
 __7.__ Realice la validación de supuestos del modelo por medio de graficos apropiados, interpretarlos y sugerir posibles soluciones si se violan algunos de ellos.
+
+
 
 __8.__ De ser necesario, realice una transformación apropiada para mejorar el ajuste y supuestos del modelo.
 
 __9.__ De ser necesario compare el ajuste y supuestos del modelo inicial y el transformado.
 
 __10.__ Realizar una función en R la cual permita ingresar el valor de X, Y, (1-alpha)% en una regresión lineal simple y retorne el intervalo de confianza para B1 dado un nivel de confianza de entrada (1-alpha)%.
+
+```{r}
+IC=function(x,y,c){
+  mod=lm(y~x)
+  t=qt((c+(1-c)/2),df=-2+length(y))
+  
+  B1=summary(mod)$coefficients[2]
+  
+  errorB1=summary(mod)$coefficients[4]
+  
+  cat("El límite inferior es: ", B1-(t*errorB1), ", y el límite superior es: ", B1+(t*errorB1), "con un nivel de confianza del ", c*100,"%")
+}
+
+
+#Poner ejemplos
+IC(Area_contruida,precio_millon,0.95)
+```
+
