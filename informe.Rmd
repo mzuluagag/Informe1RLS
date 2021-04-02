@@ -16,16 +16,48 @@ Con base en los datos de ofertas de vivienda descargadas del portal Fincaraiz(da
 ```{r}
 datos = read.csv2("E:/Mateo/Universidad/Estadística 2/Informe1RLS/datos_vivienda.xlsx - Sheet1.csv", header = TRUE, sep = ",")
 attach(datos) 
-datos
 
 ```
 __1.__ Realice un análisis exploratorio de las variables precio de vivienda (millones de pesos COP) y área de la vivienda (metros cuadrados) - incluir gráficos e indicadores apropiados interpretados.
 
-__2.__ Realice un análisis exploratorio bivariado de datos enfocado en la relaciónentre la variable respuesta (y=precio) en función de la variable predic-tora (x=area) - incluir gráficos e indicadores apropiados interpretados.
+```{r}
+summary(datos)
+#Analizar estos datos
+barplot(Area_contruida, names.arg = Area_contruida, main = "Dátos áreas viviendas", xlab = "Datos", ylab = "Área de la vivienda", col = "orange", space = 0.7)
+barplot(precio_millon, names.arg = precio_millon, main = "Dátos de precios", xlab = "Datos", ylab = "Precio en millones", col = "sky blue", space = 0.7)
+#Hacer breve análisis de estas gráficas
+```
+
+
+__2.__ Realice un análisis exploratorio bivariado de datos enfocado en la relaciónentre la variable respuesta (y=precio) en función de la variable predictora (x=area) - incluir gráficos e indicadores apropiados interpretados.
+
+```{r}
+plot(Area_contruida,precio_millon)
+#Analizar gráfica
+cor(Area_contruida,precio_millon)
+#Analizar la correlación
+
+```
+
 
 __3.__ Estime el modelo de regresión lineal simple entre precio = f(area) + e. Interprete los coeficientes del modelo B0, B1 en caso de ser correcto.
 
+```{r}
+modelo=lm(precio_millon~Area_contruida)
+summary(modelo)
+#interpretar los los coeficientes
+plot(Area_contruida,precio_millon)
+abline(modelo,col="sky blue")
+```
+
+
 __4.__ Construir un intervalo de confianza (95%) para el coeficiente B1, interpretar y concluir si el coeficiente es igual a cero o no. Compare esteresultado con una prueba de hipotesis t.
+
+```{r}
+
+
+```
+
 
 __5.__ Calcule e interprete el indicador de bondad y ajuste R^2.
 
