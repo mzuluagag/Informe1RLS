@@ -1,0 +1,163 @@
+---
+  title: "__Informe 1 estadÃ?stica 2__"
+output: pdf_document
+---
+  
+# Autores:
+## Mateo Zuluaga Giraldo
+## Angy Ortiz Mesa
+## Catalina Areiza (completar nombre)
+  
+## IntroducciÃ³n
+El presente informe tiene como objetivo desarrollar una serie de preguntas con base en una base de datos proveniente de un portal inmobiliario.
+
+Con base en los datos de ofertas de vivienda descargadas del portal Fincaraiz(datos_vivienda.xls) realizar los siguientes puntos:
+  
+## Cargar Datos
+  
+  
+```{r}
+datos <- read.csv2("C:/Users/Angy Ortiz/Desktop/datos_vivienda.xlsx - Sheet1.csv",header = TRUE, sep = ",")
+attach(datos)
+```
+
+Se observa que la base de datos contiene informacion sobre el registro del precio (y) de unas viviendas de acuerdo al area (x) construida.
+
+__1.__ Realice un anÃ¡lisis exploratorio de las variables precio de vivienda (millones de pesos COP) y Ã¡rea de la vivienda (metros cuadrados) - incluir grÃ¡ficos e indicadores apropiados interpretados.
+
+Se observa que el promedio de area construida es de 115.7 metros cuadrados, mientras que el promedio del precio es de 332 millones de pesos.
+
+Tambien se detecta que la distribucion del area contruida esta sesgada a la derecha. Esto quiere decir, que la mayoria de viviendas tiene un area contruida entre 80 y 100 metros cudrados.
+
+El histograma de precios refleja dos picos de acuerdo al precio de las viviendas. La mayoria de viviendas tienen precios entre 200 y 300 millones y otra proporcion considerable se encuentra entre 350 y 450 millones de pesos.
+
+
+```{r}
+summary(datos)
+hist(Area_contruida, main = "Datos Ã¡reas viviendas", xlab = "Ãrea de la vivienda", 
+     ylab = "Datos" , col = "orange")
+hist(precio_millon, main = "Datos de precios", xlab = "Precio en millones", 
+     ylab = "Datos", col = "sky blue")
+```
+
+
+__2.__ Realice un anÃ¡lisis exploratorio bivariado de datos enfocado en la relaciÃ³nentre la variable respuesta (y=precio) en funciÃ³n de la variable predictora (x=area) - incluir grÃ¡ficos e indicadores apropiados interpretados.
+
+Veamos la correlacion entre area contruida y el precio. Se observa que a mayor area construida  el precio aumenta y su relacion es fuerte de acuerdo con el coeficiente de correlacion de Pearson que en este caso nos dio $Coeficiente~de~correlacion=0.919$.
+
+```{r}
+plot(Area_contruida,precio_millon, xlab =  "Area Construida", ylab = "Precio en millones", 
+     main = "Relacion entre el area contruida y el precio")
+cor(Area_contruida,precio_millon)
+```
+
+
+__3.__ Estime el modelo de regresiÃ³n lineal simple entre precio = f(area) + e. Interprete los coeficientes del modelo $\beta_0$, $\beta_1$ en caso de ser correcto.
+
+El coeficiente $\beta_0$ no se debe interpretar, porque no se observan valores de area cero y no tiene sentido hablar sobre una vivienda con ningun metro cuadrado. Por otro lado el $\beta_1=2.124$ nos indica que por cada metro cuadrado adicional que se construya, se espera que el precio se incremente en promedio 0.26 millones. Adicionalmente se observa que el coeficiente es significativamente distinto de cero.(Por el Valor_p).
+
+
+```{r}
+modelo=lm(precio_millon~Area_contruida, data = datos)
+summary(modelo)
+plot(Area_contruida,precio_millon)
+abline(modelo,col="sky blue")
+```
+
+
+__4.__ Construir un intervalo de confianza (95%) para el coeficiente $\beta_1$, interpretar y concluir si el coeficiente es igual a cero o no. Compare este resultado con una prueba de hipotesis t.
+
+Con una confianza del 95% se puede concluir que el verdadero valor de $\beta_1$, del efecto del area contruida sobre el precio de las viviendas, se encuentra entre 1.74 y 2.51.
+
+Como el cero no esta incluido en este intervalo, $\beta_1$ es significativo.
+
+# Intervalo de confianza para $\beta_1$.
+```{r}
+confianza=0.95
+t=qt((confianza+(1-confianza)/2),df=-2+length(precio_millon))
+
+B1=summary(modelo)$coefficients[2]
+
+errorB1=summary(modelo)$coefficients[4]
+
+cat("El lÃ?mite inferior es: ", B1-(t*errorB1), ", y el lÃ?mite superior es: ", B1+(t*errorB1))
+```
+
+## Otra Forma
+
+```{r}
+ic<-confint(modelo, level = 0.95)
+ic
+```
+
+
+# Prueba de hipotesis para $\beta_1$.
+
+## Hipotesis
+
+$$\left\{\begin{matrix}
+  H0:\beta _1=0\\ 
+  H1:\beta _1\neq 0
+  \end{matrix}\right.$$
+    
+## Estadistico de Prueba.
+    
+$$t_0=\frac{\hat{\beta _1}}{Se(\hat{\beta _1})}\sim t_{(n-2)}$$
+    
+$$t_0=\frac{2.124}{0.186}$$
+    
+$$t_0=11.419$$
+    
+```{r}
+t_estadistico<-qt(1-0.025,24)
+t_estadistico
+```
+  
+Como $t_0$ es mayor que el $t~_{estadistico}$ se rechaza $H_0$, luego $\beta_1$ es significativo.
+  
+Haciendo una comparacion con el resultado del intervalo de confianza y con la prueba de hipotesis t se llega a la misma conclusion de que $\beta_1$ es significativo.
+  
+__5.__ Calcule e interprete el indicador de bondad y ajuste R^2.
+
+Se observa que el ajustedel modelo es de $R^2=0.8446$, es decir que el modelo explica el 84% de la variabilidad del precio.
+  
+```{r}
+rsq=cor(Area_contruida,precio_millon)^2
+rsq
+```
+  
+  
+__6.__ Â¿CuÃ¡l serÃ?a el precio promedio estimado para un apartamento de 110 metros cuadrados? Considera entonces con este resultado que un apartamento en la misma zona con 110 metros cuadrados en un precio de 200 millones serÃ?a una buena oferta? QuÃ© consideraciones adicionales se deben tener?.
+  
+De acuerdo con el modelo, el precio promedio estimado para una vivienda con 110 metros cuadrados es de 319.87 millones de pesos.
+
+
+```{r}
+predict(modelo, list(Area_contruida=110))
+```
+
+Teniendo en cuenta que una vivienda con 110 metros cuadrados en promedio tiene un costo entre 319 y 333 millones de pesos, podemos decir que una oferta de 200 millones no es considerada como una buena oferta, ya que no se encuentra en el rango promedio del costo para una vivienda con 110 metros cuadrados. Otras consideraciones para tener en cuenta y hacer una oferta es dependiendo del sector de la vivienda, cuantos baños tiene, si tiene o no parqueadero, el estrato, entre otros; todas estas variables influyen a la hora de hacer una muy buena oferta.
+
+```{r}
+predict(modelo,list(Area_contruida=110),interval = "confidence", level=0.95)
+```
+
+
+
+
+
+```{r}
+summary(modelo)$coefficients[1] + summary(modelo)$coefficients[2]*110
+  
+plot(Area_contruida, precio_millon, col = "blue", type = "n")
+points(Area_contruida, precio_millon, col = "blue")
+abline(modelo,col="sky blue")
+points(110, 200, col = "red", pch = 20)
+  
+plot(110,200, xlim = c(0,200), ylim = c(0,500), col = "red", pch = 20)
+abline(modelo,col="sky blue")
+  
+diferencia = summary(modelo)$coefficients[1] + summary(modelo)$coefficients[2]*110 - 200
+diferencia
+  
+```
